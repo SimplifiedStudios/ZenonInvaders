@@ -32,7 +32,7 @@ class LoadingState extends FlxState
 
 		if (LoadingPercentage == 100)
 		{
-			FlxG.switchState(new MainMenuState());
+			FlxG.switchState(new MenuState());
 		}
 	}
 }
