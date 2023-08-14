@@ -4,29 +4,27 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.input.keyboard.FlxKey;
+import flixel.input.keyboard.FlxKeyboard;
 import flixel.util.FlxColor;
 
 class MainMenuState extends FlxState
 {
-	// * Movement
-	var Width = FlxG.width;
-	var GroundLevel = 10;
+	var character:FlxSprite;
 
-	// * Player
-	var Player:FlxSprite;
+	// * Physics Configuration
+	var GroundedLevel = 700;
 
 	public override function create()
 	{
-		Player = new FlxSprite();
-		Player.makeGraphic(50, 50, FlxColor.WHITE);
-		Player.x = 0;
-		Player.y = 700;
-		add(Player);
+		// * Initilizing The Character
+		character = new FlxSprite();
+		character.makeGraphic(50, 50, FlxColor.WHITE);
+		add(character);
 
 		super.create();
 	}
 
-	public override function update(elapsed)
+	public override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
@@ -35,24 +33,27 @@ class MainMenuState extends FlxState
 
 	public function locomotionSystem()
 	{
-		if (FlxG.keys.anyPressed([FlxKey.UP]))
+		if (character.y != GroundedLevel)
 		{
-			Player.y -= 10;
+			character.y += 2;
 		}
 
-		if (FlxG.keys.anyPressed([FlxKey.DOWN]))
+		if (character.y == GroundedLevel)
 		{
-			Player.y += 10;
+			if (FlxG.keys.anyPressed([FlxKey.UP, FlxKey.SPACE]))
+			{
+				character.y -= 60;
+			}
 		}
 
-		if (FlxG.keys.anyPressed([FlxKey.LEFT]))
+		if (FlxG.keys.anyPressed([FlxKey.A, FlxKey.LEFT]))
 		{
-			Player.x -= 10;
+			character.x -= 10;
 		}
 
-		if (FlxG.keys.anyPressed([FlxKey.RIGHT]))
+		if (FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT]))
 		{
-			Player.x += 10;
+			character.x += 10;
 		}
 	}
 }
