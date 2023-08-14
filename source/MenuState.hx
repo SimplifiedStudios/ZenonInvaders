@@ -3,6 +3,7 @@ package;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.text.FlxText;
+import levels.DevelopmentLevel;
 import lime.system.System;
 import openfl.display.Application;
 
@@ -70,14 +71,7 @@ class MenuState extends FlxState
 		switch selectedOption
 		{
 			case 0:
-				if (Configuration.IsDevelopmentBuild)
-				{
-					FlxG.switchState(new levels.DevelopmentLevel());
-				}
-				else
-				{
-					// Real game isn't finished :c
-				}
+				FlxG.switchState(new DevelopmentLevel());
 			case 1:
 				trace("Options not finished");
 			case 2:

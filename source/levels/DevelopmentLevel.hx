@@ -1,74 +1,129 @@
-package;
+package levels;
 
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.group.FlxGroup;
-import flixel.ui.FlxText;
-import flixel.util.FlxPoint;
-import flixel.util.FlxTimer;
+import flixel.group.FlxSpriteGroup;
+import flixel.input.keyboard.FlxKey;
+import flixel.math.FlxRandom;
+import flixel.util.FlxColor;
+import lime.system.System;
 
-class PlayState extends FlxState
+class DevelopmentLevel extends FlxState
 {
-	var player:FlxSprite;
-	var platforms:FlxGroup;
-	var goal:FlxSprite;
+	// * Assets
+	var Character:FlxSprite;
+	var Ground:FlxSprite;
+	var Platform1:FlxSprite;
+	//* Character Configuration
+	var SpawnCoords = [0, 600];
+	var GroundLevel = 650;
 
-	override public function create():Void
+	var Bullets = new FlxSpriteGroup();
+	var Enemys = new FlxSpriteGroup();
+
+	public override function create()
 	{
 		super.create();
-
-		// Create player sprite
-		player = new FlxSprite(50, 50);
-		player.makeGraphic(20, 20, 0xff0000ff); // Blue square
-		player.acceleration.y = 300;
-		player.maxVelocity.x = 150;
-		player.maxVelocity.y = 200;
-		add(player);
-
-		// Create platforms
-		platforms = new FlxGroup();
-		createPlatforms();
-		add(platforms);
-
-		// Create goal sprite
-		goal = new FlxSprite(250, 200);
-		goal.makeGraphic(20, 20, 0xff0000ff); // Blue square
-		add(goal);
+		Character = new FlxSprite();
+		Character.makeGraphic(50, 50, FlxColor.WHITE);
+		Character.x = SpawnCoords[0];
+		Character.y = SpawnCoords[1];
+		add(Character);
 	}
 
-	override public function update(elapsed:Float):Void
+	public override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 
-		// Player movement
-		player.acceleration.x = 0;
-		if (FlxG.keys.LEFT)
-			player.acceleration.x -= player.maxVelocity.x * 4;
-		if (FlxG.keys.RIGHT)
-			player.acceleration.x += player.maxVelocity.x * 4;
+		// Physics and Movement Calculation :D
+		locomotionCalculation();
+		bulletAndEnemyCalculation();
+	}
 
-		// Jumping logic
-		if (FlxG.keys.justPressed.SPACE && player.isTouching(FlxObject.FLOOR))
+	public function bulletAndEnemyCalculation()
+	{
+		if (FlxG.keys.anyPressed([FlxKey.SPACE]))
 		{
-			player.velocity.y = -150;
+			var Bullet = new FlxSprite(Character.x, Character.y);
+			Bullet.makeGraphic(30, 30, FlxColor.WHITE);
+			add(Bullet);
+
+			Bullets.add(Bullet);
 		}
 
-		// Check for collisions
-		FlxG.collide(player, platforms);
-		FlxG.overlap(player, goal, onGoalOverlap);
+		for (v in Enemys)
+		{
+			v.y += 0.3;
+
+			if (v.y == 700)
+			{
+				v.destroy();
+			}
+
+			FlxG.collide(v, Character, removePlayer);
+		}
+
+		if (Math.random() >= 0.9)
+		{
+			spawnEnemy();
+		}
+
+		for (v in Bullets)
+		{
+			for (n in Enemys)
+			{
+				FlxG.collide(v, n, endEnemy);
+			}
+		}
+
+		for (i in Bullets)
+		{
+			i.y -= 10;
+
+			if (i.y == 0)
+			{
+				i.destroy();
+			}
+		}
 	}
 
-	// Function to create platforms
-	function createPlatforms():Void
+	public function locomotionCalculation()
 	{
-		// You can adjust the positions and dimensions as needed
-		platforms.add(new FlxSprite(0, 220).makeGraphic(100, 10, 0xff00ff00)); // Green platform
-		platforms.add(new FlxSprite(150, 180).makeGraphic(100, 10, 0xff00ff00)); // Green platform
+		if (Character.y != GroundLevel)
+		{
+			Character.y += 2;
+		}
+
+		if (FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT]))
+		{
+			Character.x += 10;
+		}
+
+		if (FlxG.keys.anyPressed([FlxKey.LEFT, FlxKey.A]))
+		{
+			Character.x -= 10;
+		}
 	}
 
-	// Callback when player overlaps with goal
-	function onGoalOverlap(player:FlxObject, goal:FlxObject):Void
+	public function endEnemy(Obj:FlxSprite, Ob:FlxSprite)
 	{
-		// Implement your goal logic here
+		Obj.destroy();
+		Ob.destroy();
+	}
+
+	public function removePlayer(Obj:FlxSprite, OtherObj:FlxSprite)
+	{
+		FlxG.switchState(new MenuState());
+	}
+
+	public function spawnEnemy()
+	{
+		var Enemy = new FlxSprite();
+		Enemy.makeGraphic(50, 50, FlxColor.RED);
+		Enemy.x = FlxG.random.int(0, 900);
+		add(Enemy);
+
+		Enemys.add(Enemy);
 	}
 }
