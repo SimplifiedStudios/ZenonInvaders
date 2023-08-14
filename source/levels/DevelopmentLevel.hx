@@ -1,59 +1,74 @@
-package levels;
+package;
 
 import flixel.FlxG;
-import flixel.FlxSprite;
 import flixel.FlxState;
-import flixel.input.keyboard.FlxKey;
-import flixel.util.FlxColor;
+import flixel.group.FlxGroup;
+import flixel.ui.FlxText;
+import flixel.util.FlxPoint;
+import flixel.util.FlxTimer;
 
-class DevelopmentLevel extends FlxState
+class PlayState extends FlxState
 {
-	// * Player Controller Configuration
-	var GroundLevel = 700;
-	var LeftWall = 0;
-	var RightWall = FlxG.width;
-	var SpawnCoords = [0, 600]; // X, Y
+	var player:FlxSprite;
+	var platforms:FlxGroup;
+	var goal:FlxSprite;
 
-	// * Assets
-	var Character:FlxSprite;
-
-	public override function create()
+	override public function create():Void
 	{
-		Character = new FlxSprite();
-		Character.makeGraphic(50, 50, FlxColor.WHITE);
-		Character.x = SpawnCoords[0];
-		Character.y = SpawnCoords[1];
-		add(Character);
+		super.create();
+
+		// Create player sprite
+		player = new FlxSprite(50, 50);
+		player.makeGraphic(20, 20, 0xff0000ff); // Blue square
+		player.acceleration.y = 300;
+		player.maxVelocity.x = 150;
+		player.maxVelocity.y = 200;
+		add(player);
+
+		// Create platforms
+		platforms = new FlxGroup();
+		createPlatforms();
+		add(platforms);
+
+		// Create goal sprite
+		goal = new FlxSprite(250, 200);
+		goal.makeGraphic(20, 20, 0xff0000ff); // Blue square
+		add(goal);
 	}
 
-	public override function update(elapsed:Float)
+	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 
-		// Physics and Movement Calculation :D
-		locomotionCalculation();
+		// Player movement
+		player.acceleration.x = 0;
+		if (FlxG.keys.LEFT)
+			player.acceleration.x -= player.maxVelocity.x * 4;
+		if (FlxG.keys.RIGHT)
+			player.acceleration.x += player.maxVelocity.x * 4;
+
+		// Jumping logic
+		if (FlxG.keys.justPressed.SPACE && player.isTouching(FlxObject.FLOOR))
+		{
+			player.velocity.y = -150;
+		}
+
+		// Check for collisions
+		FlxG.collide(player, platforms);
+		FlxG.overlap(player, goal, onGoalOverlap);
 	}
 
-	public function locomotionCalculation()
+	// Function to create platforms
+	function createPlatforms():Void
 	{
-		if (Character.y != GroundLevel)
-		{
-			Character.y += 2;
-		}
+		// You can adjust the positions and dimensions as needed
+		platforms.add(new FlxSprite(0, 220).makeGraphic(100, 10, 0xff00ff00)); // Green platform
+		platforms.add(new FlxSprite(150, 180).makeGraphic(100, 10, 0xff00ff00)); // Green platform
+	}
 
-		if (Character.y > GroundLevel)
-		{
-			Character.y = 700;
-		}
-
-		if (FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT]))
-		{
-			Character.x += 10;
-		}
-
-		if (FlxG.keys.anyPressed([FlxKey.LEFT, FlxKey.A]))
-		{
-			Character.x -= 10;
-		}
+	// Callback when player overlaps with goal
+	function onGoalOverlap(player:FlxObject, goal:FlxObject):Void
+	{
+		// Implement your goal logic here
 	}
 }
